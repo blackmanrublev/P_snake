@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 win_width = 400
 win_height = 400
@@ -60,7 +61,7 @@ class Player:
         self.direction_queue = [[1, 0]]
 
     def move(self):
-        if (len(self.direction_queue) > 0):
+        if len(self.direction_queue) > 0:
             self.direction = self.direction_queue.pop()
         self.body.append(Segment(self.body[-1].x + self.direction[0], self.body[-1].y + self.direction[1], cell_size))
         self.body.pop(0)
@@ -74,6 +75,9 @@ class Player:
             snake.direction_queue.append([-1, 0])
         elif keys[pygame.K_RIGHT] and self.direction != [-1, 0]:
             snake.direction_queue.append([1, 0])
+
+    def eat(self):
+        self.body.append(Segment(self.body[-1].x + self.direction[0], self.body[-1].y + self.direction[1], cell_size))
 
 
     def update(self, dt):
@@ -91,12 +95,17 @@ class Player:
 
 snake = Player()
 
-class Direction:
+class Apple:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+    
+    def draw(self):
+        rect = pygame.Rect(self.x * cell_size, self.y * cell_size, cell_size, cell_size)
+        pygame.draw.rect(screen, "red", rect)
 
+apples = [Apple(10, 10)]
 
 while run:
     for event in pygame.event.get():
@@ -115,6 +124,15 @@ while run:
     grid.draw()
 
     snake.draw()
+
+    for apple in apples:
+        apple.draw()
+        if apple.x == snake.body[-1].x and apple.y == snake.body[-1].y:
+            apples.remove(apple)
+            snake.eat()
+
+    if len(apples) == 0:
+        apples.append(Apple(random.randrange(0, math.floor(grid.width / cell_size)), random.randrange(0, math.floor(grid.height / cell_size))))
 
 
 
